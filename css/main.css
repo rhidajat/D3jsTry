@@ -4,3 +4,11 @@
 	border-color: purple;
 	padding: 3px;
 }
+
+.chart rect {
+	fill : SlateBlue;
+}
+
+.chart text {
+	fill : Salmon;
+}
