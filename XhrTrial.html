@@ -30,13 +30,26 @@
             <div class="main-content">
                 <h2>Simple Bar Chart</h2>
                 <svg class="chart"></svg>
+                
+                <h2>A Bit More Complicated Chart</h2>
+                <!--
+                <svg id="bit-complicated-chart" width="800" height="400">
+                    <g>
+                        <rect width="60" height="350" y="20"></rect>
+                        <text y="385" dy=".35em">Mark</text>
+                    </g>
+                    <g>
+                        <rect width="60" height="320" x="70" y="50"></rect>
+                        <text x="70" y="385" dy=".35em">Ron</text>
+                    </g>
+                </svg>
+                -->
+                <svg id="bit-complicated-chart"></svg>
             </div>
         </div>
 
         <script>
             d3.xhr("json/employeeHours.json", "application/json", function(error, req) {
-                console.log(req.response);
-
                 var data = [];
 
                 var employeeHours = JSON.parse(req.response);
@@ -45,8 +58,9 @@
                     data.push(employeeHour.hours);
                 }
 
+                // Creating a simple chart
                 var width = 800;
-                var height = 600;
+                var height = 400;
                 var barHeight = 40;
 
                 var x = d3.scale.linear().domain([0, d3.max(data)]).range([0, width]);
@@ -64,7 +78,37 @@
                 }).attr("y", barHeight / 2).attr("dy", ".35em").text(function(d) {
                     return d;
                 });
+                
+                createBitComplicatedBarChart(employeeHours);
             });
+            
+            function createBitComplicatedBarChart(employeeHours) {
+                var margin = {top: 20, left: 20, right: 20, bottom: 20};
+                var chartWidth = 800 - margin.left - margin.right;
+                var chartHeight = 400 - margin.top - margin.bottom;
+                
+                var barWidth = 40;
+                
+                var y = d3.scale.linear().domain([0, d3.max(employeeHours, function(d) {
+                    return d.hours;
+                })]).range([0, chartHeight]);
+                
+                var chart = d3.select("#bit-complicated-chart").attr("width", chartWidth).attr("height", chartHeight + 20);
+                
+                var bar = chart.selectAll("g").data(employeeHours).enter().append("g").attr("transform", function(d, i) {
+                    return "translate(" + i * (barWidth + 5) + ", 0)";
+                });
+                
+                bar.append("rect").attr("width", barWidth).attr("height", function(d) {
+                    return y(d.hours);
+                }).attr("y", function(d) {
+                    return chartHeight-y(d.hours);  
+                });
+                
+                bar.append("text").text(function(d) {
+                    return d.name;
+                }).attr("x", 0).attr("dy", "0.015em").attr("y", chartHeight + 15);
+            }
         </script>
     </body>
 </html>
