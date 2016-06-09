@@ -30,18 +30,18 @@
             <div class="main-content">
                 <h2>Simple Bar Chart</h2>
                 <svg class="chart"></svg>
-                
+
                 <h2>A Bit More Complicated Chart</h2>
                 <!--
                 <svg id="bit-complicated-chart" width="800" height="400">
-                    <g>
-                        <rect width="60" height="350" y="20"></rect>
-                        <text y="385" dy=".35em">Mark</text>
-                    </g>
-                    <g>
-                        <rect width="60" height="320" x="70" y="50"></rect>
-                        <text x="70" y="385" dy=".35em">Ron</text>
-                    </g>
+                <g>
+                <rect width="60" height="350" y="20"></rect>
+                <text y="385" dy=".35em">Mark</text>
+                </g>
+                <g>
+                <rect width="60" height="320" x="70" y="50"></rect>
+                <text x="70" y="385" dy=".35em">Ron</text>
+                </g>
                 </svg>
                 -->
                 <svg id="bit-complicated-chart"></svg>
@@ -78,36 +78,61 @@
                 }).attr("y", barHeight / 2).attr("dy", ".35em").text(function(d) {
                     return d;
                 });
-                
+
                 createBitComplicatedBarChart(employeeHours);
             });
-            
+
             function createBitComplicatedBarChart(employeeHours) {
-                var margin = {top: 20, left: 20, right: 20, bottom: 20};
+                var margin = {
+                    top : 20,
+                    left : 60,
+                    right : 20,
+                    bottom : 20
+                };
                 var chartWidth = 800 - margin.left - margin.right;
                 var chartHeight = 400 - margin.top - margin.bottom;
-                
-                var barWidth = 40;
-                
-                var y = d3.scale.linear().domain([0, d3.max(employeeHours, function(d) {
+
+                var barWidth = 60;
+
+                var x = d3.scale.ordinal().rangeRoundBands([0, employeeHours.length * barWidth + 20], .1);
+
+                var y = d3.scale.linear().range([0, chartHeight]);
+
+                var xAxis = d3.svg.axis().scale(x).orient("bottom");
+
+                var yAxis = d3.svg.axis().scale(y).orient("left");
+
+                 y.domain([d3.max(employeeHours, function(d) {
                     return d.hours;
-                })]).range([0, chartHeight]);
-                
-                var chart = d3.select("#bit-complicated-chart").attr("width", chartWidth).attr("height", chartHeight + 20);
-                
+                 }), 0]);
+                 
+                 x.domain(employeeHours.map(function(d) {
+                     return d.name;
+                 }));
+
+                var chart = d3.select("#bit-complicated-chart").attr("width", chartWidth + margin.left + margin.right).attr("height", chartHeight + margin.top + margin.bottom)
+                .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
                 var bar = chart.selectAll("g").data(employeeHours).enter().append("g").attr("transform", function(d, i) {
                     return "translate(" + i * (barWidth + 5) + ", 0)";
                 });
-                
+
                 bar.append("rect").attr("width", barWidth).attr("height", function(d) {
-                    return y(d.hours);
+                    return chartHeight - y(d.hours);
                 }).attr("y", function(d) {
-                    return chartHeight-y(d.hours);  
-                });
+                    return y(d.hours);
+                }).attr("x", 5).attr("fill", "Grey");
+
+                chart.append("g").attr("class", "y axis").call(yAxis);
+                chart.append("g").attr("class", "x axis").attr("transform", "translate(0, " + chartHeight + ")").call(xAxis);
                 
-                bar.append("text").text(function(d) {
-                    return d.name;
-                }).attr("x", 0).attr("dy", "0.015em").attr("y", chartHeight + 15);
+                var underworkBars = bar.filter(function(d) {
+                   return d.hours < 30; 
+                }).selectAll("rect").attr("fill", "blue");
+                
+                var overworkBars = bar.filter(function(d) {
+                   return d.hours > 50; 
+                }).selectAll("rect").attr("fill", "red");
             }
         </script>
     </body>
