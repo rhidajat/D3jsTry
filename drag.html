@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Draggable Circle</title>
+
+<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script
+	src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"
+	integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7"
+	crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css"
+	integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r"
+	crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script
+	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+	integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+	crossorigin="anonymous"></script>
+	
+<link rel="stylesheet" href="./css/main.css">
+	
+</head>
+<body>
+	<div class="jumbotron">
+		<div class="container">
+			<h1>Draggable Circle!</h1>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="col-md-6">
+			<svg id="draggable-circle">
+			</svg>
+		</div>
+	</div>
+</body>
+
+<style>
+.active {
+	fill: red;
+}
+</style>
+
+<script>
+var width = 500;
+var height = 500;
+
+var colors = d3.scale.category20c();
+var colorsLength = colors.range().length;
+
+var drag = d3.behavior.drag();
+drag.on("dragstart", dragstarted)
+.on("drag", dragged)
+.on("dragend", dragended);
+
+var svg = d3.select("#draggable-circle");
+svg.attr("height", height).attr("width", width);
+
+var xOrigin = 100;
+var yOrigin = 300;
+var i = 0;
+
+var position = {x: xOrigin, y: yOrigin};
+
+var data = [position];
+
+svg.selectAll("circle").data(data).enter().append("circle").attr("cx", function(d) {
+	return d.x;
+}).attr("cy", function(d) {
+	return d.y;
+}).attr("r", 32).attr("fill", "grey")
+.call(drag);
+
+function dragstarted(d) {
+	d3.select(this).classed("active", true);
+}
+
+function dragged(d, i) {
+	var nextX = d3.event.x;
+	var nextY = d3.event.y;
+	
+	if (nextX > width) {
+		nextX = width;
+	} else if (nextX < 0) {
+		nextX = 0;
+	}
+	
+	if (nextY > height) {
+		nextY = height;
+	} else if (nextY < 0) {
+		nextY = 0;
+	}
+	
+	d3.select(this).attr("cx", d.x = nextX).attr("cy", d.y = nextY);
+}
+
+function dragended(d) {
+	var nextColorIndex = Math.floor(Math.random() * colorsLength);
+	
+	d3.select(this).classed("active", false).attr("fill", colors(nextColorIndex));
+}
+</script>
+
+</html>
